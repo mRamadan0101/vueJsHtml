@@ -1,0 +1,205 @@
+
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Calling Api with Vue Js</title>
+            <style>
+            html, body {
+                background-color: #fff;
+                color: #636b6f;
+                font-family: 'Raleway', sans-serif;
+                font-weight: 100;
+                height: 100vh;
+                margin: 0;
+            }
+            .full-height {
+                height: 100vh;
+            }
+            .flex-center {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+            }
+            .position-ref {
+                position: relative;
+            }
+            .top-right {
+                position: absolute;
+                right: 10px;
+                top: 18px;
+            }
+            .content {
+                text-align: center;
+            }
+            .title {
+                font-size: 84px;
+            }
+            .links > a {
+                color: #636b6f;
+                padding: 0 25px;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .1rem;
+                text-decoration: none;
+                text-transform: uppercase;
+            }
+            .m-b-md {
+                margin-bottom: 30px;
+            }
+            h1{
+                text-align: center;
+                font-weight: bold;
+                font-family: timesnewroman;
+            }
+        </style>
+  </head>
+  <body>
+    <div >
+  <div class="alert alert-primary " role="alert"  style="text-align: center;">
+  Calling Api with Vue Js
+</div>
+
+
+<div class="container">
+
+<div id="app">
+  <label>Select your Search</label>
+  <select>
+    <option>Select Search Type</option>
+    <option v-on:click="enableCity()">City</option>
+    <option v-on:click="enablePrice()">Cost</option>
+    <option v-on:click="enableAvilability()">Avilabilty</option>
+  </select>
+  <div v-if="cityF">
+  <label class="col-2 col-form-label"> Find City </label>
+  <input type="text" pattern="[A-Za-z ]{1,15}" class="form-control col-2" v-model="city">
+  </div>
+
+<div v-if="priceF">
+  <label class="col-2 col-form-label"> Price Range</label>
+<br>
+  <label >From:</label>
+  <input type="text"  pattern="[0-9\-]{1,15}" class="form-control col-2" v-model="costFrm"> 
+  <label >To:</label>
+  <input type="text"  pattern="[0-9\-]{1,15}" class="form-control col-2" v-model="costTo">
+  </div>
+
+  <div v-if="dateF">
+  <label class="col-2 col-form-label"> Find Availability </label>
+<br>
+  <label>From:</label>
+  <input type="date"  class="form-control col-2" v-model="dateFrm"> 
+  <label>To:</label>
+  <input type="date" class="form-control col-2" v-model="dateTo">
+  </div>
+  <!-- <button v-on:click="getHotel(city)">Search</button> -->
+  <h1>Hotel Avilabilty </h1>
+
+  <div class="card-deck">
+    <div  v-for="hotel in filteredHotel">
+      
+            <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+          <div class="card-header">{{ hotel.name }}</div>
+          <div class="card-body">
+            <h5 class="card-title">{{ hotel.city }}</h5>
+            <h5 class="card-text">{{ hotel.price }} $ for 1 Night</h5>
+            <h6> Avilabilty </h6>
+              <div  v-for="avil in hotel.availability">
+
+                  <ul>
+                    <li>
+                      {{ avil.from }}
+                    </li>
+                    <li>
+                      {{ avil.to }}
+                    </li>
+                  </ul>
+              </div>
+            
+          </div>
+        </div>
+     
+    
+    </div>
+    </div>
+</div>
+</div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.9/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+new Vue({
+  el: '#app',
+  data () {
+    return {
+      info: [],
+      city:'',
+      costFrm:'',
+      costTo:'',
+      dateFrm:'',
+      dateTo:'',
+      cityF:false,
+      priceF:false,
+      dateF:false,
+    }
+  },
+  mounted () {
+    axios
+      .get('https://api.myjson.com/bins/pq0f6')
+      .then(response => (this.info = response.data.hotels))
+  },methods:{
+      enableCity: function() {
+        this.cityF = true;
+        this.priceF = false;
+        this.dateF = false;
+      },
+      enablePrice: function(e) {
+        this.cityF = false;
+        this.priceF = true;
+        this.dateF = false;
+      },
+      enableAvilability: function() {
+        this.cityF = false;
+        this.priceF = false;
+        this.dateF = true;
+      }
+    },
+computed:{
+      filteredHotel: function () {
+          return this.info.filter((hotel) => {
+            if (this.city) {
+              return hotel.city.match(this.city);
+            }else if (this.costFrm && this.costTo) {
+                if (hotel.price >= this.costFrm && hotel.price <= this.costTo)
+                {
+                  return hotel;
+                }           
+            }else if (this.dateFrm && this.dateTo) {
+              let dateFindFrm = this.dateFrm.split("-").reverse().join("-");
+              let dateFindTo = this.dateTo.split("-").reverse().join("-");
+              for (var i = 0 ; i < 3; i++) {                
+                    if (hotel.availability[i].from >= dateFindFrm && hotel.availability[i].to <= dateFindTo) 
+                    {
+                      return hotel;  
+                    }
+              }
+            }else{
+              return hotel;
+            }
+          });
+        }
+      },
+});
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
