@@ -9,3 +9,5 @@ select your search type and data will display without refresh page
 created with HTML,VUEJS
 
 
+<br>
+to use it jsut open index.html
